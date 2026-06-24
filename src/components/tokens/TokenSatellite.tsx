@@ -86,15 +86,6 @@ export function TokenSatellite({ token }: TokenSatelliteProps) {
 
   const sphereRadius = isXGT ? 0.55 : 0.35;
 
-  // DEBUG: Check satellite properties
-  console.log(`🛰️ ${token.symbol} Satellite:`, {
-    orbitRadius: token.orbitRadius,
-    sphereRadius,
-    marketCap: token.marketCap,
-    rank: token.rank,
-    position: groupRef.current?.position.toArray()
-  });
-
   useFrame((state) => {
     if (!groupRef.current) return;
     
