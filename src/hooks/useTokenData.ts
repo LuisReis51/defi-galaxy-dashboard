@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useGalaxyStore } from '@/store/galaxyStore';
-import { fetchTopTokensByNetwork, fetchOHLCV } from '@/api/coingecko';
 import { MARKET_CAP_TO_ORBIT_RADIUS, VOLUME_TO_ORBIT_SPEED } from '@/constants/networks';
 import type { Token } from '@/store/types';
 
@@ -64,7 +63,6 @@ export function useTokenData() {
       if (window.location.search.includes('clearCache')) {
         localStorage.removeItem('defi-galaxy-tokens-cache');
         localStorage.removeItem('defi-galaxy-tokens-cache-timestamp');
-        console.log('🗑️ Cache cleared for testing');
       }
       
       try {
@@ -77,7 +75,6 @@ export function useTokenData() {
         if (cacheData && cacheTimestamp) {
           const age = Date.now() - parseInt(cacheTimestamp);
           if (age < CACHE_TTL) {
-            console.log('📦 Using cached token data (age:', Math.round(age / 1000), 'seconds)');
             const cachedTokens = JSON.parse(cacheData);
             setTokens(cachedTokens);
             setTokensLoading(false);
@@ -86,15 +83,12 @@ export function useTokenData() {
         }
         
         // Load tokens from serverless function (single call, shared cache)
-        console.log('Loading tokens from serverless function...');
-        
         const response = await fetch('/.netlify/functions/tokens');
         if (!response.ok) {
           throw new Error(`Serverless function failed: ${response.status}`);
         }
         
         const networkData = await response.json();
-        console.log('Serverless response:', Object.keys(networkData), 'networks');
         
         const networks = ['ethereum', 'bsc', 'solana', 'arbitrum', 'polygon', 'avalanche', 'optimism', 'base'];
         const allTokens: Token[] = [];
@@ -103,27 +97,6 @@ export function useTokenData() {
           if (cancelled) return;
           
           const markets = networkData[networkId] || [];
-          console.log(`Tokens for ${networkId}:`, markets?.length);
-
-        // DEBUG: Print sample API response to check network names
-        if (markets.length > 0) {
-          console.log('🔍 Sample API token data:', {
-            symbol: markets[0].symbol,
-            id: markets[0].id,
-            name: markets[0].name,
-            platforms: (markets[0] as any).platforms
-          });
-        }
-
-        // DEBUG: Print token info
-        markets.slice(0, 5).forEach((m: any, i: number) => {
-          console.log(`🔍 Token ${i}:`, {
-            symbol: m.symbol,
-            id: m.id,
-            platforms: (m as any).platforms,
-            networkId: networkId, // ✅ FIXED: Use actual network being fetched for
-          });
-        });
 
         const networkTokens: Token[] = markets.slice(0, 20).map((m: any, i: number) => ({
           id: `${networkId}-${m.id}`, // ✅ FIXED: Network-specific ID to avoid duplicates
@@ -170,17 +143,13 @@ export function useTokenData() {
           });
         }
 
-        console.log('✅ Tokens processed:', networkTokens.length, 'for', networkId);
-        allTokens.push(...networkTokens); // ✅ FIXED: Merge instead of replace
+        allTokens.push(...networkTokens);
       }
-      
-      console.log('🎯 Total tokens loaded for all networks:', allTokens.length);
-      
+
       // Only update tokens if we have all networks (resilience against partial loads)
       const uniqueNetworks = new Set(allTokens.map(t => t.networkId)).size;
       if (uniqueNetworks === networks.length) {
         setTokens(allTokens);
-        console.log('✅ Complete token set loaded');
       } else if (allTokens.length > 0) {
         console.warn('⚠️ Partial load detected, keeping previous tokens to prevent planets from disappearing');
       } else {
@@ -191,9 +160,6 @@ export function useTokenData() {
       if (allTokens.length > 0 && uniqueNetworks === networks.length) {
         localStorage.setItem(cacheKey, JSON.stringify(allTokens));
         localStorage.setItem(`${cacheKey}-timestamp`, Date.now().toString());
-        console.log('💾 Complete token data cached for 5 minutes');
-      } else {
-        console.warn('⚠️ Incomplete load (', uniqueNetworks, '/', networks.length, ' networks) - not caching');
       }
       } catch (err) {
         console.error('Failed to load tokens:', err);
