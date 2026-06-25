@@ -8,7 +8,6 @@ headers = []
 publish = "D:\\Token\\XGT\\CascadeProjects\\windsurf-project\\defi-galaxy-dashboard\\dist"
 publishOrigin = "config"
 commandOrigin = "config"
-base = "D:\\Token\\XGT\\CascadeProjects\\windsurf-project\\defi-galaxy-dashboard"
 command = "npm run build"
 functions = "D:\\Token\\XGT\\CascadeProjects\\windsurf-project\\defi-galaxy-dashboard\\netlify\\functions"
 

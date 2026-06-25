@@ -1,6 +1,6 @@
 # DeFi Galaxy Dashboard — Keys, APIs & Integration Reference
 
-> **Last updated:** June 2026  
+> **Last updated:** June 24, 2026 - PRODUCTION READY ✅  
 > All secrets must go in `.env.local` (git-ignored). Never commit real keys.
 
 ---
@@ -15,6 +15,10 @@ VITE_CMC_BASE_URL=https://pro-api.coinmarketcap.com
 # ─── CoinGecko ────────────────────────────────────────────────────────────────
 VITE_COINGECKO_API_KEY=          # Pro key (optional — free tier works without it)
 VITE_COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
+
+# ─── Production (Netlify) ───────────────────────────────────────────────────────
+COINGECKO_KEY=                    # Serverless function - set via Netlify CLI
+# Command: npx netlify-cli env:set COINGECKO_KEY YOUR_KEY
 
 # ─── DefiLlama ────────────────────────────────────────────────────────────────
 # No API key required. Base URL only.
@@ -56,16 +60,24 @@ Copy this block to `.env.local` and fill in secrets before running.
 
 **Category map** (used to filter tokens by chain ecosystem):
 
-| Network | CoinGecko Category |
-|---------|--------------------|
-| Ethereum | `ethereum-ecosystem` |
-| BNB Chain | `bnb-chain-ecosystem` |
-| Solana | `solana-ecosystem` |
-| Arbitrum | `arbitrum-ecosystem` |
-| Polygon | `polygon-ecosystem` |
-| Avalanche | `avalanche-ecosystem` |
-| Optimism | `optimism-ecosystem` |
-| Base | `base-ecosystem` |
+| Network | CoinGecko Category | Status |
+|---------|--------------------|--------|
+| Ethereum | `ethereum-ecosystem` | ✅ Working |
+| BNB Chain | `binance-smart-chain` | ✅ Working |
+| Solana | `solana-ecosystem` | ✅ Working |
+| Arbitrum | `arbitrum-ecosystem` | ✅ Working |
+| Polygon | `polygon-ecosystem` | ✅ Working |
+| Avalanche | `avalanche-ecosystem` | ✅ Working |
+| Optimism | `optimism-ecosystem` | ✅ Working |
+| Base | `base-ecosystem` | ✅ Working |
+
+**🔧 Serverless Function Implementation**
+- **File:** `netlify/functions/tokens.mjs`
+- **Endpoint:** `/.netlify/functions/tokens`
+- **Method:** Sequential fetching with retry logic
+- **Cache:** 2-minute TTL, no-store for partial results
+- **Authentication:** `COINGECKO_KEY` environment variable
+- **Rate Limiting:** 250ms delay between requests, 3 retries with backoff
 
 **Rate limits:**
 - Free tier: **30 calls/min**, **10,000 calls/month**
