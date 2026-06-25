@@ -58,6 +58,7 @@ export interface Token {
   glowIntensity: number;
   color?: string;
   isHighlighted?: boolean;
+  category?: string; // Token category for identity ring classification
 }
 
 export interface WalletActivity {

@@ -7,6 +7,8 @@ import { useGalaxyStore } from '@/store/galaxyStore';
 import { socialScoreToGlow, priceChangeToColor } from '@/utils/colors';
 import { formatPrice } from '@/utils/math';
 import { TokenTrail } from './TokenTrail';
+import { IdentityRing } from './IdentityRing';
+import { TokenLogo } from './TokenLogo';
 import { getInheritedTokenTraits } from '@/constants/networks';
 
 interface TokenSatelliteProps {
@@ -26,6 +28,7 @@ export function TokenSatellite({ token }: TokenSatelliteProps) {
   const [hovered, setHovered] = useState(false);
   const networks = useGalaxyStore((s) => s.networks);
   const [isMobile, setIsMobile] = useState(false);
+  const [distance, setDistance] = useState(0);
 
   // Detect mobile for touch optimization
   useEffect(() => {
@@ -97,6 +100,10 @@ export function TokenSatellite({ token }: TokenSatelliteProps) {
 
   useFrame((state) => {
     if (!groupRef.current) return;
+    
+    // Calculate distance from camera for LOD
+    const cameraDistance = groupRef.current.position.distanceTo(state.camera.position);
+    setDistance(cameraDistance);
     
     // Skip animation when paused
     if (isPaused) return;
@@ -171,6 +178,12 @@ export function TokenSatellite({ token }: TokenSatelliteProps) {
           side={THREE.DoubleSide}
         />
       </Sphere>
+
+      {/* Identity Ring - Camera-facing holographic ring */}
+      <IdentityRing token={token} distance={distance} />
+      
+      {/* Token Logo - Camera-facing with LOD */}
+      <TokenLogo token={token} distance={distance} />
 
       {/* Invisible, enlarged tap target for mobile */}
       <mesh

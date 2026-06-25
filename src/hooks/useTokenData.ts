@@ -48,6 +48,86 @@ function generateMockOHLCV(basePrice: number, days = 30) {
   return result;
 }
 
+function assignTokenCategory(symbol: string, name: string, id: string): string {
+  const symbolLower = symbol.toLowerCase();
+  const nameLower = name.toLowerCase();
+  
+  // DeFi blue chips
+  if (['wbtc', 'weth', 'usdc', 'usdt', 'dai', 'busd', 'usdp', 'tusd', 'frax', 'lusd', 'mim'].includes(symbolLower)) {
+    return 'stablecoin';
+  }
+  
+  // Layer 1 tokens
+  if (['eth', 'bnb', 'sol', 'avax', 'matic', 'arb', 'op', 'ftm', 'cro', 'atom'].includes(symbolLower)) {
+    return 'layer1';
+  }
+  
+  // Layer 2 tokens
+  if (symbolLower.includes('arb') || symbolLower.includes('op') || symbolLower.includes('polygon') || 
+      symbolLower.includes('optimism') || symbolLower.includes('base')) {
+    return 'layer2';
+  }
+  
+  // DEX tokens
+  if (['uni', 'sushi', 'cake', 'pancake', '1inch', 'crv', 'bal', 'lrc', 'knc', 'run'].includes(symbolLower) ||
+      nameLower.includes('uniswap') || nameLower.includes('sushiswap') || nameLower.includes('pancakeswap')) {
+    return 'exchange';
+  }
+  
+  // Lending protocols
+  if (['aave', 'comp', 'maker', 'lend', 'celsius', 'nexo', 'blockfi'].includes(symbolLower) ||
+      nameLower.includes('aave') || nameLower.includes('compound') || nameLower.includes('maker')) {
+    return 'lending';
+  }
+  
+  // Gaming tokens
+  if (['axs', 'axie', 'sand', 'decentraland', 'mana', 'gala', 'enj', 'chz', 'flow'].includes(symbolLower) ||
+      nameLower.includes('gaming') || nameLower.includes('axie') || nameLower.includes('decentraland')) {
+    return 'gaming';
+  }
+  
+  // Meme tokens
+  if (['doge', 'shib', 'pepe', 'floki', 'baby', 'elon', 'musk'].includes(symbolLower) ||
+      nameLower.includes('doge') || nameLower.includes('shiba')) {
+    return 'meme';
+  }
+  
+  // Oracle tokens
+  if (['link', 'band', 'tellor', 'pyth', 'uma'].includes(symbolLower) ||
+      nameLower.includes('chainlink') || nameLower.includes('band')) {
+    return 'oracle';
+  }
+  
+  // Derivatives
+  if (['perp', 'synth', 'snx', 'dydx', 'gmx'].includes(symbolLower) ||
+      nameLower.includes('perpetual') || nameLower.includes('synthetic')) {
+    return 'derivatives';
+  }
+  
+  // NFT tokens
+  if (['ape', 'bakc', 'mayc', 'otherdeed', 'gala'].includes(symbolLower) ||
+      nameLower.includes('yuga') || nameLower.includes('bored')) {
+    return 'nft';
+  }
+  
+  // Privacy tokens
+  if (['xmr', 'zec', 'dash', 'vtc', 'nav'].includes(symbolLower)) {
+    return 'privacy';
+  }
+  
+  // Storage tokens
+  if (['file', 'ar', 'storj', 'scprime', 'sia'].includes(symbolLower)) {
+    return 'storage';
+  }
+  
+  // Infrastructure
+  if (['dot', 'ksm', 'near', 'algo', 'hbar', 'xtz', 'eos'].includes(symbolLower)) {
+    return 'infrastructure';
+  }
+  
+  return 'defi'; // Default category
+}
+
 export function useTokenData() {
   const setTokens = useGalaxyStore((s) => s.setTokens);
   const setTokensLoading = useGalaxyStore((s) => s.setTokensLoading);
@@ -143,6 +223,7 @@ export function useTokenData() {
           orbitPhase: (i / 20) * Math.PI * 2, // ✅ FIXED: Use 20 tokens for even distribution
           glowIntensity: calculateGlowIntensity(m.market_cap_rank ?? i + 1, m.total_volume),
           color: calculateTokenColor(m.market_cap_rank ?? i + 1, m.price_change_percentage_24h ?? 0),
+          category: assignTokenCategory(m.symbol, m.name, m.id),
         }));
 
         // Add XGT token for BSC network
@@ -167,6 +248,7 @@ export function useTokenData() {
             glowIntensity: 2.0,
             color: '#FFD700', // Gold color for XGT
             isHighlighted: true,
+            category: 'defi', // XGT category
           });
         }
 
